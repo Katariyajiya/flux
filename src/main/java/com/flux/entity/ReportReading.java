@@ -78,4 +78,32 @@ public class ReportReading {
     public String getUnit() {
         return unit;
     }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setDepartment(Department department) {
+        this.department = department;
+    }
+
+    public void setReadingTime(LocalDateTime readingTime) {
+        this.readingTime = readingTime;
+    }
+
+    public void setParameter(String parameter) {
+        this.parameter = parameter;
+    }
+
+    public void setValue(Double value) {
+        this.value = value;
+    }
+
+    public void setUnit(String unit) {
+        this.unit = unit;
+    }
+
+    public void setReport(Report report) {
+        this.report=report;
+    }
 }
