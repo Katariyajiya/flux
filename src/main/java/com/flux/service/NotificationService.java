@@ -12,26 +12,62 @@ import java.util.List;
 public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final RecipientService recipientService;
+    private final FcmNotificationService fcmNotificationService;
 
-    public NotificationService(NotificationRepository notificationRepository, RecipientService recipientService) {
+    public NotificationService(NotificationRepository notificationRepository, RecipientService recipientService, FcmNotificationService fcmNotificationService) {
         this.notificationRepository = notificationRepository;
         this.recipientService = recipientService;
+        this.fcmNotificationService = fcmNotificationService;
     }
 
-    public List<Notification> createNotification(Report report, List<User> recipients,String title,String message){
+    public List<Notification> createNotification(
+            Report report,
+            List<User> recipients,
+            String title,
+            String message) {
+
         List<Notification> notifications = recipients.stream()
-                .filter(user -> !notificationRepository.existsByReportAndUser(report,user))
-                .map(
-                user -> {
+                .filter(user ->
+                        !notificationRepository.existsByReportAndUser(report, user))
+                .map(user -> {
+
                     Notification notification = new Notification();
+
                     notification.setReport(report);
                     notification.setUser(user);
                     notification.setTitle(title);
+                    notification.setMessage(message);
                     notification.setStatus("PENDING");
                     notification.setCreatedAt(LocalDateTime.now());
-                    notification.setMessage(message);
+
+                    if (user.getFcmToken() != null &&
+                            !user.getFcmToken().isBlank()) {
+
+                        try {
+                            fcmNotificationService.sendNotification(
+                                    user.getFcmToken(),
+                                    title,
+                                    message
+                            );
+
+                            notification.setStatus("SENT");
+
+                        } catch (Exception e) {
+
+                            notification.setStatus("FAILED");
+
+                            System.out.println(
+                                    "FCM failed for user "
+                                            + user.getId()
+                                            + ": "
+                                            + e.getMessage()
+                            );
+                        }
+                    }
+
                     return notification;
-                }).toList();
+                })
+                .toList();
 
         if (notifications.isEmpty()) {
             return List.of();

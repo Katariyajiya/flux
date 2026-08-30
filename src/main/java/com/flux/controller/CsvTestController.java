@@ -44,13 +44,14 @@ public class CsvTestController {
 
     @PostMapping("/parse")
     public List<ReportReading> parseCsv(
-            @RequestParam String filePath
+            @RequestParam String filePath,
+            @RequestParam String reportId
     ) throws Exception {
 
         // Temporary report for testing the parser
-        Report report = reportRepository.findByReportId("RPT-001")
+        Report report = reportRepository.findByReportId(reportId)
                 .orElseThrow(() ->
-                        new IllegalArgumentException("Report RPT-001 not found"));
+                        new IllegalArgumentException( "Report not found: " + reportId));
 
         List<ReportReading> readings =
                 csvReportParserService.parse(filePath, report);
