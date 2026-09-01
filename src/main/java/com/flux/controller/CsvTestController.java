@@ -3,10 +3,8 @@ package com.flux.controller;
 import com.flux.entity.*;
 import com.flux.repository.DepartmentRepository;
 import com.flux.repository.ReportRepository;
-import com.flux.service.CsvReportParserService;
-import com.flux.service.NotificationService;
-import com.flux.service.RecipientService;
-import com.flux.service.ReportProcessingService;
+import com.flux.service.*;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,19 +19,30 @@ public class CsvTestController {
     private final RecipientService recipientService;
     private final DepartmentRepository departmentRepository;
     private final NotificationService notificationService;
+    private final ReportWorkflowService reportWorkflowService;
 
 
     public CsvTestController(CsvReportParserService csvReportParserService,
                              ReportProcessingService reportProcessingService, ReportRepository reportRepository, RecipientService recipientService,
-                             DepartmentRepository departmentRepository, NotificationService notificationService) {
+                             DepartmentRepository departmentRepository, NotificationService notificationService, ReportWorkflowService reportWorkflowService) {
         this.csvReportParserService = csvReportParserService;
         this.reportProcessingService = reportProcessingService;
         this.reportRepository = reportRepository;
         this.recipientService = recipientService;
         this.departmentRepository = departmentRepository;
         this.notificationService = notificationService;
+        this.reportWorkflowService = reportWorkflowService;
     }
 
+    @PostMapping("/process/{reportId}")
+    public ResponseEntity<String> processsReport(
+            @PathVariable String reportId,
+            @RequestParam String filePath
+    ) throws Exception{
+        Report report = reportRepository.findByReportId(reportId).orElseThrow(() -> new IllegalArgumentException("Report not found: " + reportId));
+        reportWorkflowService.processReport(report,filePath);
+        return ResponseEntity.ok("Report processed sucessfully: "+reportId);
+    }
 
     @GetMapping("/recipients/{departmentId}")
     public List<User> getRecipients(@PathVariable Long departmentId){
