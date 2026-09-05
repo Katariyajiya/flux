@@ -25,6 +25,88 @@ public class CsvReportParserService {
     public CsvReportParserService(DepartmentRepository departmentRepository) {
         this.departmentRepository = departmentRepository;
     }
+
+    public void validate(String filePath) throws IOException {
+
+        DateTimeFormatter formatter =
+                DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+
+        try (Reader reader = Files.newBufferedReader(Path.of(filePath));
+             CSVParser csvParser = CSVFormat.DEFAULT
+                     .builder()
+                     .setHeader()
+                     .setSkipHeaderRecord(true)
+                     .build()
+                     .parse(reader)) {
+
+            List<String> requiredColumns = List.of(
+                    "reading_time",
+                    "department",
+                    "parameter",
+                    "value",
+                    "unit"
+            );
+
+            for (String column : requiredColumns) {
+                if (!csvParser.getHeaderMap().containsKey(column)) {
+                    throw new IllegalArgumentException(
+                            "Invalid CSV format. Missing column: " + column
+                    );
+                }
+            }
+
+            for (CSVRecord record : csvParser) {
+
+                String readingTimeValue = record.get("reading_time");
+                String departmentName = record.get("department");
+                String parameter = record.get("parameter");
+                String value = record.get("value");
+                String unit = record.get("unit");
+
+                if (readingTimeValue.isBlank()
+                        || departmentName.isBlank()
+                        || parameter.isBlank()
+                        || value.isBlank()
+                        || unit.isBlank()) {
+                    throw new IllegalArgumentException(
+                            "Invalid CSV data. Required field is empty."
+                    );
+                }
+
+                try {
+                    LocalDateTime.parse(
+                            readingTimeValue,
+                            formatter
+                    );
+                } catch (Exception e) {
+                    throw new IllegalArgumentException(
+                            "Invalid reading_time format: "
+                                    + readingTimeValue
+                                    + ". Expected: yyyy-MM-dd HH:mm"
+                    );
+                }
+
+
+                try {
+                    Double.parseDouble(value);
+                } catch (Exception e) {
+                    throw new IllegalArgumentException(
+                            "Invalid value: " + value
+                    );
+                }
+
+
+                departmentRepository.findByName(departmentName)
+                        .orElseThrow(() ->
+                                new IllegalArgumentException(
+                                        "Department not found: "
+                                                + departmentName
+                                )
+                        );
+            }
+        }
+    }
+
     public List<ReportReading> parse(String filePath, Report report) throws IOException{
 
         List<ReportReading> readings = new ArrayList<>();
