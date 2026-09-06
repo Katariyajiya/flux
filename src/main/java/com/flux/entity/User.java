@@ -19,7 +19,16 @@ public class User {
     @JoinColumn(name = "department_id",nullable = false)
     private Department department;
 
+    @Column
+    private String password;
 
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 
     public Long getId() {
         return id;
@@ -47,6 +56,14 @@ public class User {
 
     public String getPhone() {
         return phone;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
     }
 
     public void setPhone(String phone) {
