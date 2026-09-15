@@ -3,6 +3,7 @@ package com.flux.repository;
 import com.flux.entity.Department;
 import com.flux.entity.Role;
 import com.flux.entity.User;
+import com.flux.entity.UserStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -14,4 +15,5 @@ public interface UserRepository extends JpaRepository<User,Long> {
     Optional<User> findByEmail(String email);
     boolean existsByEmail(String email);
 
+    List<User> findByStatus(UserStatus userStatus);
 }
