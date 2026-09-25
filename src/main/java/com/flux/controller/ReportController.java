@@ -78,7 +78,7 @@ public class ReportController {
             @RequestParam String s3Key,
             @RequestHeader("X-Lambda-Secret") String lambdaSecret) throws Exception {
 
-        if (!lambdaSecret.equals(lambdaProcessingSecret)) {
+        if (lambdaSecret == null || !lambdaSecret.equals(lambdaProcessingSecret)) {
             return ResponseEntity.status(403)
                     .body("Invalid Lambda secret");
         }
@@ -89,6 +89,10 @@ public class ReportController {
                 "flux-process-",
                 ".csv"
         );
+
+        // AWS SDK getObject(Path) expects the destination file
+        // to NOT already exist.
+        Files.deleteIfExists(tempFile);
 
         try {
             s3Service.downloadFile(s3Key, tempFile);

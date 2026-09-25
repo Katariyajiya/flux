@@ -29,12 +29,37 @@ public class S3Service{
         s3Client.putObject(request, RequestBody.fromFile(filePath));
     }
     public void downloadFile(String s3Key, Path destination) {
-        GetObjectRequest request = GetObjectRequest.builder()
-                .bucket(bucketName)
-                .key(s3Key)
-                .build();
 
-        s3Client.getObject(request, destination);
+        System.out.println("========== S3 DOWNLOAD ==========");
+        System.out.println("Bucket: " + bucketName);
+        System.out.println("S3 Key: " + s3Key);
+        System.out.println("Destination: " + destination);
+        System.out.println("=================================");
+
+        try {
+            GetObjectRequest request = GetObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(s3Key)
+                    .build();
+
+            s3Client.getObject(request, destination);
+
+            System.out.println("S3 DOWNLOAD SUCCESS");
+
+        } catch (Exception e) {
+
+            System.out.println("========== S3 DOWNLOAD FAILED ==========");
+            System.out.println("Bucket: " + bucketName);
+            System.out.println("S3 Key: " + s3Key);
+            System.out.println("Exception: " + e.getClass().getName());
+            System.out.println("Message: " + e.getMessage());
+
+            e.printStackTrace();
+
+            System.out.println("========================================");
+
+            throw e;
+        }
     }
     public void testConnection(){
         s3Client.headBucket(builder -> builder.bucket(bucketName));

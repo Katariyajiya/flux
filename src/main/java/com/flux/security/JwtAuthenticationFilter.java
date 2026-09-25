@@ -1,23 +1,22 @@
 package com.flux.security;
 
+import com.flux.entity.User;
 import com.flux.repository.UserRepository;
 import com.flux.service.JwtService;
+
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import com.flux.entity.User;
-import com.flux.repository.UserRepository;
 
 import java.io.IOException;
-
-// Request → read JWT → validate JWT → identify user → allow request
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -25,7 +24,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
     private final UserRepository userRepository;
 
-    public JwtAuthenticationFilter(JwtService jwtService, UserRepository userRepository) {
+    public JwtAuthenticationFilter(
+            JwtService jwtService,
+            UserRepository userRepository) {
+
         this.jwtService = jwtService;
         this.userRepository = userRepository;
     }
@@ -39,6 +41,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String authHeader = request.getHeader("Authorization");
 
+        // No JWT → continue normally
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
@@ -61,8 +64,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             User user = userRepository.findByEmail(email)
                     .orElse(null);
 
-            UsernamePasswordAuthenticationToken authentication = null;
             if (user != null) {
+
+                System.out.println("JWT USER: " + user.getEmail());
+                System.out.println("JWT ROLE: " + user.getRole());
 
                 UserDetails userDetails =
                         org.springframework.security.core.userdetails.User
@@ -71,11 +76,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                 .roles(user.getRole().name())
                                 .build();
 
-                authentication = new UsernamePasswordAuthenticationToken(
-                        userDetails,
-                        null,
-                        userDetails.getAuthorities()
-                );
+                UsernamePasswordAuthenticationToken authentication =
+                        new UsernamePasswordAuthenticationToken(
+                                userDetails,
+                                null,
+                                userDetails.getAuthorities()
+                        );
 
                 authentication.setDetails(
                         new WebAuthenticationDetailsSource()
@@ -85,14 +91,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext()
                         .setAuthentication(authentication);
             }
-
-            authentication.setDetails(
-                    new WebAuthenticationDetailsSource()
-                            .buildDetails(request)
-            );
-
-            SecurityContextHolder.getContext()
-                    .setAuthentication(authentication);
         }
 
         filterChain.doFilter(request, response);
