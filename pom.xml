@@ -103,6 +103,13 @@
 			<version>2.42.33</version>
 		</dependency>
 
+		<dependency>
+			<groupId>org.apache.pdfbox</groupId>
+			<artifactId>pdfbox</artifactId>
+			<version>3.0.8</version> <!-- Use the latest 3.x version -->
+		</dependency>
+
+
 	</dependencies>
 
 	<build>
