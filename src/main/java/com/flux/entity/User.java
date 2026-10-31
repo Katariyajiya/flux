@@ -13,13 +13,34 @@ public class User {
     private String phone;
     private String fcmToken;
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = true)
     private Role role;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "department_id",nullable = false)
+    @JoinColumn(name = "department_id",nullable = true)
     private Department department;
 
+    @Column
+    private String password;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private UserStatus status;
+
+    public UserStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(UserStatus status) {
+        this.status = status;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 
     public Long getId() {
         return id;
@@ -47,6 +68,14 @@ public class User {
 
     public String getPhone() {
         return phone;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
     }
 
     public void setPhone(String phone) {
