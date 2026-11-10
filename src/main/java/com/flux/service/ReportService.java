@@ -34,4 +34,12 @@ public class ReportService {
         report.setUploadedBy(user.getId());
         return reportRepository.save(report);
     }
+    public Report findByReportId(String reportId) {
+        return reportRepository.findByReportId(reportId)
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "Report not found: " + reportId
+                        )
+                );
+    }
 }

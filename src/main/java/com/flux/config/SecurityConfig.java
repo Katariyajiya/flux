@@ -28,9 +28,12 @@ public class SecurityConfig{
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/test/sqs").permitAll()
                         .requestMatchers("/api/admin/**")
                         .hasRole("ADMIN")
                         .requestMatchers("/api/reports/upload").hasAnyRole("ADMIN", "MANAGER")
+                        .requestMatchers("/api/reports/process").permitAll()
+                        .requestMatchers("/health").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(
@@ -39,12 +42,6 @@ public class SecurityConfig{
                 );
 
         return http.build();
-    }
-
-    @Bean
-    public String testPasswordHash(PasswordEncoder passwordEncoder) {
-        System.out.println( passwordEncoder.encode("password123"));
-        return passwordEncoder.encode("password123");
     }
 
     @Bean
